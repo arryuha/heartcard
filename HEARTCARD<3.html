@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Для тебя 💛</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #fff7d6, #ffd9e9);
+    font-family: "Segoe UI", sans-serif;
+    position: relative;
+    overflow: hidden;
+    /* фон сердечек будем менять из JS */
+    --heart-bg: url("photo1.png");
+  }
+
+  /* большие полупрозрачные сердечки из текущего фото */
+  body::before,
+  body::after {
+    content: "";
+    position: absolute;
+    width: 380px;
+    height: 380px;
+    background: var(--heart-bg) center/cover no-repeat;
+    opacity: 0.22;
+    filter: blur(2px);
+    transform-origin: center;
+    mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 32 29" xmlns="http://www.w3.org/2000/svg"><path d="M23.6,0c-2.6,0-5,1.3-6.6,3.3C15.4,1.3,13,0,10.4,0C4.7,0,0,4.7,0,10.4c0,4.5,2.9,8.3,7,9.7l9.9,8.8l9.9-8.8c4.1-1.4,7-5.2,7-9.7C33.8,4.7,29.1,0,23.6,0z"/></svg>');
+    mask-size: cover;
+    mask-repeat: no-repeat;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::before {
+    top: -40px;
+    left: -50px;
+    transform: scale(1.3) rotate(-12deg);
+  }
+
+  body::after {
+    bottom: -70px;
+    right: -40px;
+    transform: scale(1.15) rotate(9deg);
+  }
+
+  .card {
+    background: white;
+    padding: 32px 40px;
+    border-radius: 24px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+    text-align: center;
+    max-width: 480px;
+    width: 90%;
+    animation: fadeIn 1s ease;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .heart {
+    font-size: 64px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: transform 0.3s ease, filter 0.3s ease;
+  }
+
+  .heart:hover {
+    transform: scale(1.25);
+    filter: drop-shadow(0 0 12px rgba(255,0,72,0.4));
+  }
+
+  h1 {
+    margin: 10px 0 6px;
+    font-size: 24px;
+    color: #e7667b;
+  }
+
+  p {
+    margin-top: 8px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #444;
+  }
+
+  /* маленькие всплывающие сердечки / фейерверк */
+  .float-heart {
+    position: absolute;
+    font-size: 22px;
+    animation: floatUp 2.2s ease-out forwards;
+    opacity: 0.9;
+  }
+
+  @keyframes floatUp {
+    from { transform: translateY(10px) scale(0.7); opacity: 1; }
+    to   { transform: translateY(-110px) scale(1.2); opacity: 0; }
+  }
+
+  /* карусель фоток */
+  .carousel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 16px 0 8px;
+  }
+
+  .carousel img {
+    width: 260px;
+    max-width: 70vw;
+    height: auto;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    transition: opacity 0.4s ease;
+  }
+
+  .carousel-btn {
+    background: white;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: background 0.2s ease, transform 0.2s ease;
+    user-select: none;
+  }
+
+  .carousel-btn:hover {
+    background: #ffe6ef;
+    transform: scale(1.1);
+  }
+
+  .hint {
+    font-size: 12px;
+    color: #777;
+    margin-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+  <div class="heart" id="bigHeart">❤️</div>
+
+  <div class="carousel">
+    <button class="carousel-btn" id="prevBtn">◀</button>
+    <img id="carouselImage" src="photo1.png" alt="Наше фото">
+    <button class="carousel-btn" id="nextBtn">▶</button>
+  </div>
+
+  <div class="hint">Самому умному и крутому 💛</div>
+
+  <h1>С днем четверга и моей первой html открытки 🥰</h1>
+
+  <p id="text">
+    Я знаю, как тебе сейчас нелегко,<br>
+    но ты умничка и молодец!<br>
+    Всё обязательно пройдет и наладится<br>
+    (вероятность 100%😇) 💖
+    <br><br>
+    p.s. ну и да... тебе во вторник КАПЕЦ 😈💋
+  </p>
+</div>
+
+<script>
+  // большое сердце + мини-фейерверк сердечек
+  const card = document.getElementById("card");
+  const bigHeart = document.getElementById("bigHeart");
+
+  bigHeart.addEventListener("click", (event) => {
+    const rect = bigHeart.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    for (let i = 0; i < 10; i++) {
+      const small = document.createElement("div");
+      small.className = "float-heart";
+      small.textContent = "❤️";
+
+      // позиционируем вокруг сердечка
+      const offsetX = (Math.random() - 0.5) * 120;
+      const offsetY = (Math.random() - 0.5) * 40;
+
+      small.style.left = centerX + offsetX + "px";
+      small.style.top = centerY + offsetY + "px";
+
+      document.body.appendChild(small);
+
+      setTimeout(() => small.remove(), 2200);
+    }
+  });
+
+  // список всех фотографий
+  const photos = [
+    "photo1.png",
+    "photo2.jpg",
+    "photo3.png",
+    "photo4.jpg",
+    "photo5.jpg",
+    "photo6.jpg",
+    "photo7.jpg",
+    "photo8.jpg",
+    "photo9.jpg",
+    "photo10.jpg"
+  ];
+
+  let currentPhoto = 0;
+
+  const carouselImage = document.getElementById("carouselImage");
+  const nextBtn = document.getElementById("nextBtn");
+  const prevBtn = document.getElementById("prevBtn");
+
+  // музыка: запускается при первом листании
+  const music = new Audio("music.mp3");
+  music.loop = true;
+  let musicStarted = false;
+
+  function startMusicOnce() {
+    if (!musicStarted) {
+      music.play().catch(() => {});
+      musicStarted = true;
+    }
+  }
+
+  // смена фона под текущее фото
+  function updateBackground() {
+    const img = photos[currentPhoto];
+    document.body.style.setProperty("--heart-bg", `url("${img}")`);
+  }
+
+  // показываем первое фото и фон
+  updateBackground();
+
+  nextBtn.addEventListener("click", () => {
+    startMusicOnce();
+
+    currentPhoto = (currentPhoto + 1) % photos.length;
+    carouselImage.style.opacity = 0;
+    setTimeout(() => {
+      carouselImage.src = photos[currentPhoto];
+      carouselImage.style.opacity = 1;
+      updateBackground();
+    }, 200);
+  });
+
+  prevBtn.addEventListener("click", () => {
+    startMusicOnce();
+
+    currentPhoto = (currentPhoto - 1 + photos.length) % photos.length;
+    carouselImage.style.opacity = 0;
+    setTimeout(() => {
+      carouselImage.src = photos[currentPhoto];
+      carouselImage.style.opacity = 1;
+      updateBackground();
+    }, 200);
+  });
+</script>
+
+</body>
+</html>
